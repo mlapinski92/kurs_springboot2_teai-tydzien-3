@@ -45,8 +45,8 @@ public class CarApi {
     public ResponseEntity<EntityModel<Car>> getCarById(@PathVariable long id) {
         Link link = linkTo(CarApi.class).slash(id).withSelfRel();
         Optional<Car> carById = carService.getCarById(id);
-        EntityModel<Car> carEntityModel = new EntityModel<>(carById.get(), link);
         if (carById.isPresent()) {
+            EntityModel<Car> carEntityModel = new EntityModel<>(carById.get(), link);
             return new ResponseEntity<>(carEntityModel, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
