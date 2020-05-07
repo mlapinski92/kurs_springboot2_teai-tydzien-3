@@ -1,6 +1,8 @@
-package pl.lapinski.car_project;
+package pl.lapinski.car_project.model;
 
-public class Car {
+import org.springframework.hateoas.RepresentationModel;
+
+public class Car extends RepresentationModel {
 
     private long id;
     private String mark;
