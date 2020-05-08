@@ -33,7 +33,7 @@ public class CarApi {
     public ResponseEntity<CollectionModel<Car>> getCars() {
         List<Car> carList = carService.getCarList();
         if (!carList.isEmpty()) {
-            carList.forEach(car -> car.add(linkTo(CarApi.class).slash(car.getId()).withSelfRel()));
+            carList.forEach(car -> car.addIf(!car.hasLinks(), () -> linkTo(CarApi.class).slash(car.getId()).withSelfRel()));
             Link link = linkTo(CarApi.class).withSelfRel();
             CollectionModel<Car> collectionModel = new CollectionModel<>(carList, link);
             return new ResponseEntity<>(collectionModel, HttpStatus.OK);
@@ -42,14 +42,15 @@ public class CarApi {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Car>> getCarById(@PathVariable long id) {
+    public ResponseEntity<Car> getCarById(@PathVariable long id) {
         Link link = linkTo(CarApi.class).slash(id).withSelfRel();
         Optional<Car> carById = carService.getCarById(id);
-        if (carById.isPresent()) {
-            EntityModel<Car> carEntityModel = new EntityModel<>(carById.get(), link);
-            return new ResponseEntity<>(carEntityModel, HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return carById.map(car -> {
+            car.addIf(!carById.get().hasLinks(), () -> link);
+            return new ResponseEntity<>(car, HttpStatus.OK);
+
+        })
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @GetMapping("/colour/{colour}")
